@@ -1,5 +1,11 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import FormErrors from '../Validations/FormErrors.js'
+import styled from 'styled-components';
+
+const ErrorWrapper = styled.h5`
+color: red;
+`
 
 class UserRegistration extends Component {
     constructor(){
@@ -7,7 +13,11 @@ class UserRegistration extends Component {
         this.state={
             name: "",
             email: "",
-            password: ""
+            password: "",
+            formErrors: {email: '',password: ''},
+            emailValid: false,
+            passwordValid: false,
+            formValid: false
         }
         this.handleNameChange= this.handleNameChange.bind(this);
         this.handleEmailChange= this.handleEmailChange.bind(this);
@@ -23,14 +33,18 @@ class UserRegistration extends Component {
         })
     }
     handleEmailChange(e){
+        const name = e.target.name;
+        const value = e.target.value;
         this.setState({
             email : e.target.value
-        })
+        },() => { this.validateField(name, value) })
     }
     handlePasswordChange(e){
+        const name = e.target.name;
+        const value = e.target.value;
         this.setState({
             password : e.target.value
-        })
+        },() => { this.validateField(name, value) })
     }
     handleClick(e){
         e.preventDefault()
@@ -45,6 +59,35 @@ class UserRegistration extends Component {
             console.log(error);
         })
 
+    }
+    validateField(fieldName, value) {
+        let fieldValidationErrors = this.state.formErrors;
+        let emailValid = this.state.emailValid;
+        let passwordValid = this.state.passwordValid;
+
+        switch(fieldName) {
+            case 'email':
+                emailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
+                fieldValidationErrors.email = emailValid ? '' : ' is invalid';
+                break;
+            case 'password':
+                passwordValid = value.length >= 6;
+                fieldValidationErrors.password = passwordValid ? '': ' is too short';
+                break;
+            default:
+                break;
+        }
+        this.setState({formErrors: fieldValidationErrors,
+            emailValid: emailValid,
+            passwordValid: passwordValid
+        }, this.validateForm);
+    }
+    validateForm() {
+        this.setState({formValid: this.state.emailValid && this.state.passwordValid});
+    }
+
+    errorClass(error) {
+        return(error.length === 0 ? '' : 'has-error');
     }
     render() {
         return (
@@ -78,8 +121,13 @@ class UserRegistration extends Component {
 
                     />
                     <button
-                        className="butonUserregister" onClick={this.handleClick}>SignUp</button>
+                        className="butonUserregister" onClick={this.handleClick} disabled={!this.state.formValid}>SignUp</button>
                 </form>
+                <div>
+              <ErrorWrapper>
+                  <FormErrors formErrors={this.state.formErrors} />
+              </ErrorWrapper>
+            </div>
             </div>
         );
     }
