@@ -3,8 +3,8 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-
 const mongoose = require('mongoose');
+ const passport = require('passport');
 
 const app = express();
  
@@ -20,6 +20,8 @@ var db = mongoose.connection;
 app.use(bodyParser.urlencoded({extended: true}))
 
 app.use(bodyParser.json());
+
+app.use(passport.initialize());
 
 app.post('/userRegistration',function (req,res) {
    var user = req.body;
