@@ -4,7 +4,7 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
- const passport = require('passport');
+const passport = require('passport');
 
 const app = express();
  
@@ -32,6 +32,29 @@ app.post('/userRegistration',function (req,res) {
         res.json(user)
     })
 });
+
+app.post('/auth',function (req,res) {
+  userRegistration.findOne({name: req.body.name}, function (err,user) {
+       console.log('user found');
+          if(err){
+              console.log('This is error response')
+              res.json(err)
+          }
+          if(user.password === req.body.password){
+              console.log('user and pass correct')
+              res.json(user);
+
+          }
+          else{
+              console.log("credentials are wrong")
+              res.json({data: "Login invalid"});
+          }
+
+   }
+   )
+
+})
+
 app.listen(3001,function () {
     console.log("Server is Running at 3001")
 });
