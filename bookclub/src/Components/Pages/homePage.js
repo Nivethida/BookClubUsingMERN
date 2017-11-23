@@ -1,7 +1,4 @@
 
-/**
- * Created by madhan on 9/28/17.
- */
 import React, { Component } from 'react';
 import Login from '../userComponent/login'
 import {Container, Row, Col} from 'react-grid-system';

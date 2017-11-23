@@ -1,41 +1,55 @@
 import React, { Component } from 'react';
 import axios from 'axios'
+import {Redirect} from 'react-router-dom'
+
 class Login extends Component {
 
 constructor(){
     super()
     this.state ={
         name: "",
-        password: ""
+        password: "",
+        redirect: false
 
     }
-    this.handleUsername = this.handleUsername.bind(this);
-    this.handlePassword = this.handlePassword.bind(this);
-    this.userLogin=this.userLogin.bind(this);
+    this._handleUsername = this._handleUsername.bind(this);
+    this._handlePassword = this._handlePassword.bind(this);
+    this._onUserLogin=this._onUserLogin.bind(this);
 }
-handleUsername(e){
+_handleUsername(e){
 this.setState({
     name: e.target.value
      })
 }
-handlePassword(e){
+_handlePassword(e){
     this.setState({
         password: e.target.value
     })
 }
-userLogin(e){
+_onUserLogin(e){
     e.preventDefault();
     axios.post('/auth',{
         name: this.state.name,
         password: this.state.password
     }).then((response)=>{
         console.log(response);
+        this.setState({
+            redirect: true
+        })
+
     }).catch((error)=>{
         console.log(error);
     })
 }
     render() {
+
+        if(this.state.redirect){
+            return(
+            <Redirect to='/userpage'/>
+            )
+        }
         return (
+
             <div className="login">
                 <form>
                         <input className="hinput"
@@ -43,17 +57,17 @@ userLogin(e){
                                placeholder="username"
                                name="name"
                                value={this.state.name}
-                               onChange={this.handleUsername}
+                               onChange={this._handleUsername}
                         />
                         <input className="hinput"
                                type="password"
                                placeholder="password"
                                name="password"
                                value={this.state.password}
-                               onChange={this.handlePassword}
+                               onChange={this._handlePassword}
 
                         />
-                        <button onClick={this.userLogin}>SignIn</button>
+                        <button onClick={this._onUserLogin}>SignIn</button>
                 </form>
             </div>
         );

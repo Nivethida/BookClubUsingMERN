@@ -4,7 +4,8 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const passport = require('passport');
+const jwt = require('jsonwebtoken');
+const exjwt = require('express-jwt');
 
 const app = express();
  
@@ -17,11 +18,20 @@ mongoose.connect('mongodb://localhost/bookClub',function (err,db) {
     }
 });
 var db = mongoose.connection;
-app.use(bodyParser.urlencoded({extended: true}))
 
 app.use(bodyParser.json());
 
-app.use(passport.initialize());
+app.use(bodyParser.urlencoded({extended: true}))
+
+ app.use((req, res, next) => {
+     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+     res.setHeader('Access-Control-Allow-Headers', 'Content-type,Authorization');
+     next();
+ });
+
+const jwtMW = exjwt({
+    secret: 'reactjs 4 ever'
+});
 
 app.post('/userRegistration',function (req,res) {
    var user = req.body;
@@ -42,18 +52,44 @@ app.post('/auth',function (req,res) {
           }
           if(user.password === req.body.password){
               console.log('user and pass correct')
-              res.json(user);
+              let token = jwt.sign(
+                  {id: user.id, username: user.name },
+                  'reactjs 4 ever',
+                  { expiresIn: 129600 }
+                  ); // Sigining the token
+
+              res.json({
+                  success: true,
+                  err: null,
+                  token
+              });
 
           }
           else{
-              console.log("credentials are wrong")
-              res.json({data: "Login invalid"});
+
+              res.status(401).json({
+                  success: true,
+                  err: "UserName or password is incorrect",
+                  token: null});
           }
 
    }
    )
 
-})
+});
+
+ app.get('/userpage', jwtMW /* Using the express jwt MW here */, (req, res) => {
+     res.send('You are authenticated'); //Sending some response when authenticated
+ });
+
+ app.use(function (err, req, res, next) {
+     if (err.name === 'UnauthorizedError') { // Send the error rather than to show it on the console
+         res.status(401).send(err);
+     }
+     else {
+         next(err);
+     }
+ });
 
 app.listen(3001,function () {
     console.log("Server is Running at 3001")
